@@ -22,6 +22,9 @@ app.use((req, res, next) => {
 
 const PORT = 3000;
 const BINANCE_STREAMR_ID = "binance-streamr.eth/ETHUSDT/trades";
+const DATA_BUFFER_SIZE = 100;
+const PREDICTION_STEPS_FORWARD = 30;
+const LOSS_THRESHOLD = 20;
 
 const streamr = new StreamrClient({
   auth: {
@@ -58,10 +61,10 @@ streamr.subscribe(
     const priceData = message.price;
     dataBuffer.push(priceData);
 
-    if (dataBuffer.length === 100) {
+    if (dataBuffer.length === DATA_BUFFER_SIZE) {
       arimaModel.fit(dataBuffer);
       // Predict the next 30 steps forward
-      const [pred, errors] = arimaModel.predict(30);
+      const [pred, errors] = arimaModel.predict(PREDICTION_STEPS_FORWARD);
       // compute average price from pred
       const sum = pred.reduce((a: number, b: number) => a + b, 0);
       const avgPred = sum / pred.length;
@@ -76,7 +79,7 @@ streamr.subscribe(
 
       dataBuffer = [];
 
-      if (loss > 20) {
+      if (loss > LOSS_THRESHOLD) {
         return;
       }
 
