@@ -1,0 +1,41 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+server/node_modules
+server/.pnp
+server.pnp.js
+#dist
+
+# testing
+server/coverage
+server/cypress/videos
+server/cypress/screenshots
+
+# production
+server/build
+server/dist
+server/public/robots.txt
+server/public/sitemap.xml
+server/public/index.html
+
+# misc
+.DS_Store
+server/.env
+server/.env.*
+server/!.env.example
+server.idea
+server/.next
+
+
+server/npm-debug.log*
+server/yarn-debug.log*
+server/yarn-error.log*
+
+
+# vscode
+server/.vscode
+
+#environment
+.env
+.env.*
+server/.env

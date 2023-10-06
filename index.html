@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Line Chart Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <style>
+      #tableContainer {
+        max-height: 200px;
+        overflow-y: auto;
+        text-align: center;
+      }
+
+      #myTable {
+        width: 100%;
+      }
+
+      #myTable th {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+      }
+
+      #myTable th,
+      #myTable td {
+        padding: 8px;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <div style="text-align: center; padding-top: 10px; font-size: small">
+      <h1 id="symbol"></h1>
+    </div>
+    <canvas id="myChart" width="600" height="400"></canvas>
+    <div style="text-align: center; padding-top: 20px; font-size: small">
+      <h1 id="clock"></h1>
+    </div>
+    <div id="tableContainer">
+      <table id="myTable">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Price</th>
+            <th>Timestamp</th>
+            <th>Predicted Price</th>
+            <th>Predicted Timestamp</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Table rows will be dynamically added here using JavaScript -->
+        </tbody>
+      </table>
+    </div>
+    <script></script>
+    <script>
+      const chart = new Chart(document.getElementById("myChart"), {
+        type: "line",
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: "Price",
+              data: [],
+              borderColor: "red",
+              fill: false,
+            },
+            {
+              label: "Prediction Price",
+              data: [],
+              borderColor: "blue",
+              fill: false,
+            },
+          ],
+        },
+        options: {
+          title: {
+            display: true,
+            text: "Arima Predictions",
+          },
+          scales: {
+            x: {
+              type: "linear",
+              title: {
+                display: true,
+                text: "Time",
+              },
+            },
+            y: {
+              type: "linear",
+              title: {
+                display: true,
+                text: "Price",
+              },
+            },
+          },
+        },
+      });
+
+      function updateChart() {
+        fetch("http://localhost:3000/api/tradesWithArimaPredictions")
+          .then((response) => response.json())
+          .catch((err) => {
+            console.log(err);
+            const titleContainer = document.getElementById("symbol");
+            titleContainer.innerHTML = "no data to display";
+
+            const tableContainer = document.getElementById("tableContainer");
+            tableContainer.style.display = "none";
+          })
+          .then((res) => {
+            res.map((item) => {
+              const timestamp = new Date(item.predictionTimestamp);
+              // dividing by 1000 to convert it from milliseconds to seconds.
+              chart.data.labels.push(timestamp.getTime() / 1000);
+              chart.data.datasets[0].data.push(item.price);
+              chart.data.datasets[1].data.push(item.predictionPrice);
+
+              const clock = document.getElementById("clock");
+              clock.innerHTML = new Date(
+                Date.parse(item.timestamp)
+              ).toLocaleString();
+              const symbol = document.getElementById("symbol");
+              symbol.innerHTML = `ARIMA prediction: ${item.symbol}`;
+
+              // Table
+              const table = document.getElementById("myTable");
+              const row = table.insertRow(-1);
+              const symbolCell = row.insertCell(0);
+              const priceCell = row.insertCell(1);
+              const timestampCell = row.insertCell(2);
+              const predictionPriceCell = row.insertCell(3);
+              const predictionTimestampCell = row.insertCell(4);
+              symbolCell.innerHTML = item.symbol;
+              priceCell.innerHTML = item.price;
+              timestampCell.innerHTML = new Date(
+                item.timestamp
+              ).toLocaleString();
+              predictionPriceCell.innerHTML = item.predictionPrice;
+              predictionTimestampCell.innerHTML = new Date(
+                item.predictionTimestamp
+              ).toLocaleString();
+            });
+
+            chart.update();
+          });
+      }
+      updateChart();
+
+      const interval = setInterval(() => {
+        chart.data.labels = [];
+        chart.data.datasets[0].data = [];
+        chart.data.datasets[1].data = [];
+
+        updateChart();
+      }, 5000);
+    </script>
+  </body>
+</html>
