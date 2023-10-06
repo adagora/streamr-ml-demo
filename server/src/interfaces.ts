@@ -7,4 +7,5 @@ export interface BiananceMessageWithPrediction {
   predictionErrors: number;
   predictionPrice: number;
   predictionLoss: number;
+  predictionTimestamp: string;
 }
