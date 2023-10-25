@@ -4,21 +4,11 @@ const ARIMA = require("arima");
 import express from "express";
 import { attachTimestamp, rmse } from "./utils";
 import { BiananceMessageWithPrediction } from "./interfaces";
+const cors = require("cors");
 
 const app = express();
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-  );
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
-    return res.status(200).json({});
-  }
-  next();
-});
+app.use(cors());
 
 const PORT = 3000;
 const BINANCE_STREAMR_ID = "binance-streamr.eth/ETHUSDT/trades";

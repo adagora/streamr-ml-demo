@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "arima": "^0.2.5",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "streamr-client": "^8.5.5"
   }
